@@ -10,7 +10,7 @@
     h1{font-size:1.4rem;margin:0 0 8px}
     p{margin:8px 0}
     .controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0}
-    select,input[type=number]{font-size:1rem;padding:6px}
+    select{font-size:1rem;padding:6px}
     button{padding:8px 10px;font-size:1rem}
     .card{border:1px solid #ddd;padding:18px;border-radius:8px;background:#fafafa}
     .problem{font-size:2rem;margin:10px 0}
@@ -44,9 +44,6 @@
       <option value="8">+8</option>
       <option value="9">+9</option>
     </select>
-
-    <label style="margin-left:12px;" for="count">Problems / round:</label>
-    <input id="count" type="number" min="5" max="200" value="50" style="width:80px">
 
     <button id="startBtn">Start</button>
     <button id="resetBtn">Reset</button>
@@ -98,7 +95,6 @@
       const summaryEl = document.getElementById('summary');
       const summaryText = document.getElementById('summaryText');
       const historyEl = document.getElementById('history');
-      const countInput = document.getElementById('count');
       const keypadButtons = document.querySelectorAll('.keypad button');
 
       let addend = Number(addendSelect.value);
@@ -108,7 +104,6 @@
       let problemsAsked = 0;
       let correct = 0;
       let incorrect = 0;
-      let maxProblems = Number(countInput.value) || 50;
       let lastLeft = null;
 
       function rand0to9(){
@@ -129,7 +124,6 @@
       function startRound(){
         if(running) return;
         addend = Number(addendSelect.value);
-        maxProblems = Number(countInput.value) || 50;
         problemsAsked = 0; correct = 0; incorrect = 0;
         historyEl.textContent = '';
         summaryEl.classList.add('hidden');
@@ -137,7 +131,6 @@
         running = true;
         startBtn.disabled = true;
         addendSelect.disabled = true;
-        countInput.disabled = true;
         newProblem();
         interval = setInterval(()=>{
           timer -= 1;
@@ -151,7 +144,6 @@
         clearInterval(interval);
         startBtn.disabled = false;
         addendSelect.disabled = false;
-        countInput.disabled = false;
         problemEl.textContent = '—';
         feedbackEl.textContent = '';
         summaryEl.classList.remove('hidden');
@@ -166,7 +158,6 @@
         problemsAsked = 0; correct = 0; incorrect = 0;
         startBtn.disabled = false;
         addendSelect.disabled = false;
-        countInput.disabled = false;
         problemEl.textContent = '—';
         feedbackEl.textContent = '';
         historyEl.textContent = '';
@@ -193,7 +184,6 @@
           historyEl.textContent += `${left} + ${addend} = ${userVal} ✗ → ${correctVal}\n`;
         }
         historyEl.scrollTop = historyEl.scrollHeight;
-        if(problemsAsked >= maxProblems){ endRound(); return; }
         newProblem();
       }
 
