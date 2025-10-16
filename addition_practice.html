@@ -173,7 +173,8 @@
         summaryEl.classList.add('hidden');
       }
 
-      function submitAnswer(userVal){  
+      function submitAnswer(userVal){
+debugger;	  
         if(!running) return;
         const left = Number(problemEl.dataset.left);
         if(Number.isNaN(left)) return;
@@ -204,9 +205,8 @@
           if(val === 'clear'){
             answerInput.value = '';
           } else {
-            answerInput.value += val;
-            const userNum = Number(answerInput.value);
-            if(answerInput.value.length >= 2 || userNum > 9){ submitAnswer(userNum); }
+            const userNum = Number(val);
+            submitAnswer(userNum);
           }
         });
       });
@@ -214,12 +214,11 @@
       answerInput.addEventListener('keydown', (e)=>{
         if(e.key >= '0' && e.key <= '9'){
           e.preventDefault();
-          answerInput.value += e.key;
-          const userNum = Number(answerInput.value);
-          if(answerInput.value.length >= 2 || userNum > 9){ submitAnswer(userNum); }
+          const userNum = Number(e.key);
+          submitAnswer(userNum);
         } else if(e.key === 'Backspace'){
           e.preventDefault();
-          answerInput.value = answerInput.value.slice(0,-1);
+          answerInput.value = '';
         }
       });
 
