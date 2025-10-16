@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Addition Practice — Fixed Addend — 60s</title>
+  <style>
+    :root{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;}
+    body{max-width:700px;margin:32px auto;padding:20px;color:#111}
+    h1{font-size:1.4rem;margin:0 0 8px}
+    p{margin:8px 0}
+    .controls{display:flex;gap:8px;align-items:center;margin:12px 0}
+    select,input[type=number]{font-size:1rem;padding:6px}
+    button{padding:8px 10px;font-size:1rem}
+    .card{border:1px solid #ddd;padding:18px;border-radius:8px;background:#fafafa}
+    .problem{font-size:2rem;margin:10px 0}
+    .feedback{min-height:1.5rem;font-weight:600}
+    .summary{margin-top:14px}
+    .small{font-size:0.9rem;color:#555}
+    .hidden{display:none}
+    #history{margin-top:10px;font-family:monospace;font-size:0.95rem}
+    .correct{color:green}
+    .wrong{color:#c0392b}
+    #timer{font-weight:700}
+  </style>
+</head>
+<body>
+  <h1>Addition practice (0–9 + fixed addend)</h1>
+  <p class="small">Minimal, keyboard-first. Choose an addend (0–9), press <kbd>Start</kbd>, type answers and press <kbd>Enter</kbd>. 60-second round.</p>
+
+  <div class="controls">
+    <label for="addend">Fix addend:</label>
+    <select id="addend">
+      <option value="0">+0</option>
+      <option value="1">+1</option>
+      <option value="2">+2</option>
+      <option value="3">+3</option>
+      <option value="4">+4</option>
+      <option value="5">+5</option>
+      <option value="6">+6</option>
+      <option value="7">+7</option>
+      <option value="8">+8</option>
+      <option value="9">+9</option>
+    </select>
+
+    <label style="margin-left:12px;" for="count">Problems / round:</label>
+    <input id="count" type="number" min="5" max="200" value="50" style="width:80px">
+
+    <button id="startBtn">Start</button>
+    <button id="resetBtn">Reset</button>
+  </div>
+
+  <div class="card">
+    <div><span>Time left: </span><span id="timer">60</span>s</div>
+
+    <div class="problem" id="problem">—</div>
+
+    <div>
+      <label for="answer">Your answer:</label>
+      <input id="answer" inputmode="numeric" autocomplete="off" autofocus style="font-size:1.2rem;padding:6px;width:120px">
+    </div>
+
+    <div class="feedback" id="feedback"></div>
+
+    <div id="history" aria-live="polite"></div>
+
+    <div class="summary hidden" id="summary">
+      <h2>Round summary</h2>
+      <p id="summaryText"></p>
+      <p class="small">You can change the addend and press <strong>Start</strong> to run another 60s round.</p>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const addendSelect = document.getElementById('addend');
+      const startBtn = document.getElementById('startBtn');
+      const resetBtn = document.getElementById('resetBtn');
+      const problemEl = document.getElementById('problem');
+      const answerInput = document.getElementById('answer');
+      const feedbackEl = document.getElementById('feedback');
+      const timerEl = document.getElementById('timer');
+      const summaryEl = document.getElementById('summary');
+      const summaryText = document.getElementById('summaryText');
+      const historyEl = document.getElementById('history');
+      const countInput = document.getElementById('count');
+
+      let addend = Number(addendSelect.value);
+      let timer = 60;
+      let interval = null;
+      let running = false;
+      let problemsAsked = 0;
+      let correct = 0;
+      let incorrect = 0;
+      let maxProblems = Number(countInput.value) || 50;
+
+      function rand0to9(){ return Math.floor(Math.random()*10); }
+      function newProblem(){
+        const left = rand0to9();
+        problemEl.textContent = `${left} + ${addend} =`;
+        problemEl.dataset.left = left;
+        answerInput.value = '';
+        feedbackEl.textContent = '';
+        answerInput.focus();
+      }
+
+      function startRound(){
+        if(running) return;
+        addend = Number(addendSelect.value);
+        maxProblems = Number(countInput.value) || 50;
+        problemsAsked = 0; correct = 0; incorrect = 0;
+        historyEl.textContent = '';
+        summaryEl.classList.add('hidden');
+        timer = 60; timerEl.textContent = timer;
+        running = true;
+        startBtn.disabled = true;
+        addendSelect.disabled = true;
+        countInput.disabled = true;
+        newProblem();
+        interval = setInterval(()=>{
+          timer -= 1;
+          timerEl.textContent = timer;
+          if(timer <= 0){ endRound(); }
+        },1000);
+      }
+
+      function endRound(){
+        running = false;
+        clearInterval(interval);
+        startBtn.disabled = false;
+        addendSelect.disabled = false;
+        countInput.disabled = false;
+        problemEl.textContent = '—';
+        feedbackEl.textContent = '';
+        summaryEl.classList.remove('hidden');
+        const total = correct + incorrect;
+        const fpm = Math.round((correct / 60) * 60); // same as correct per minute (within 1)
+        summaryText.innerHTML = `Correct: <strong>${correct}</strong><br>Incorrect: <strong>${incorrect}</strong><br>Total attempted: <strong>${total}</strong><br>Facts per minute (correct): <strong>${correct}</strong>`;
+        answerInput.blur();
+      }
+
+      function resetAll(){
+        clearInterval(interval);
+        running = false;
+        timer = 60; timerEl.textContent = timer;
+        problemsAsked = 0; correct = 0; incorrect = 0;
+        startBtn.disabled = false;
+        addendSelect.disabled = false;
+        countInput.disabled = false;
+        problemEl.textContent = '—';
+        feedbackEl.textContent = '';
+        historyEl.textContent = '';
+        summaryEl.classList.add('hidden');
+      }
+
+      function submitAnswer(){
+        if(!running) return;
+        const left = Number(problemEl.dataset.left);
+        if(Number.isNaN(left)) return;
+        const user = answerInput.value.trim();
+        if(user === '') return;
+        const userVal = Number(user);
+        const correctVal = left + addend;
+        problemsAsked += 1;
+        if(userVal === correctVal){
+          correct += 1;
+          feedbackEl.textContent = '✓';
+          feedbackEl.className = 'feedback correct';
+          historyEl.textContent = (historyEl.textContent ? historyEl.textContent + '\n' : '') + `${left} + ${addend} = ${userVal} ✓`;
+        } else {
+          incorrect += 1;
+          feedbackEl.textContent = `✗ (answer: ${correctVal})`;
+          feedbackEl.className = 'feedback wrong';
+          historyEl.textContent = (historyEl.textContent ? historyEl.textContent + '\n' : '') + `${left} + ${addend} = ${userVal} ✗ → ${correctVal}`;
+        }
+
+        // move on or end if reached maxProblems
+        if(problemsAsked >= maxProblems){ endRound(); return; }
+        // otherwise new problem immediately
+        newProblem();
+      }
+
+      // event handlers
+      startBtn.addEventListener('click', startRound);
+      resetBtn.addEventListener('click', resetAll);
+
+      answerInput.addEventListener('keydown', function(e){
+        if(e.key === 'Enter'){
+          e.preventDefault();
+          submitAnswer();
+        }
+      });
+
+      // keep history in monospace block, preserve newlines
+      const obs = new MutationObserver(()=>{
+        historyEl.style.whiteSpace = 'pre-wrap';
+      });
+      obs.observe(historyEl,{childList:true,characterData:true,subtree:true});
+
+      // initialize
+      resetAll();
+
+      // accessibility: focus answer input on load
+      window.addEventListener('load', ()=>{ answerInput.focus(); });
+    })();
+  </script>
+</body>
+</html>
