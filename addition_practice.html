@@ -6,27 +6,27 @@
   <title>Addition Practice — Fixed Addend — 60s</title>
   <link href="https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap" rel="stylesheet">
   <style>
-    :root{font-family:'Indie Flower', cursive; color:#333;}
-    body{max-width:700px;margin:32px auto;padding:20px;background:#d7ecff;color:#333}
-    h1{font-size:1.4rem;margin:0 0 8px}
-    p{margin:8px 0}
-    .controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0}
-    select, button{font-family:'Indie Flower', cursive;}
-    select{font-size:1rem;padding:6px}
-    button{padding:8px 10px;font-size:1rem;background:#ffd6e8;border:1px solid #ddd;border-radius:6px;cursor:pointer}
-    button:disabled{opacity:0.6;cursor:not-allowed}
-    .card{border:1px solid #ddd;padding:18px;border-radius:8px;background:#fafafa}
-    .problem{font-size:2rem;margin:10px 0}
-    .feedback{min-height:1.5rem;font-weight:600}
-    .summary{margin-top:14px}
-    .small{font-size:0.9rem;color:#555}
-    .hidden{display:none}
-    #history{margin-top:10px;font-family:'Indie Flower', cursive;font-size:0.95rem; max-height:150px; overflow-y:auto; border-top:1px solid #ddd; padding-top:6px; white-space:pre;}
-    .correct{color:green}
-    .wrong{color:#c0392b}
-    #timer{font-weight:700}
-    .keypad{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px}
-    .keypad button{flex:1 0 30%; font-size:1.5rem; padding:12px; background:#ffd6e8; border:1px solid #ddd; border-radius:6px; cursor:pointer}
+    :root { font-family: 'Indie Flower', cursive; color: #333; }
+    body { max-width:700px; margin:32px auto; padding:20px; background:#d7ecff; color:#333; }
+    h1 { font-size:1.4rem; margin:0 0 8px; }
+    p { margin:8px 0; }
+    .controls { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:12px 0; }
+    select, button { font-family: 'Indie Flower', cursive; }
+    select { font-size:1rem; padding:6px; }
+    button { padding:8px 10px; font-size:1rem; background:#ffd6e8; border:1px solid #ddd; border-radius:6px; cursor:pointer; }
+    button:disabled { opacity:0.6; cursor:not-allowed; }
+    .card { border:1px solid #ddd; padding:18px; border-radius:8px; background:#fafafa; }
+    .problem { font-size:2rem; margin:10px 0; }
+    .feedback { min-height:1.5rem; font-weight:600; }
+    .summary { margin-top:14px; }
+    .small { font-size:0.9rem; color:#555; }
+    .hidden { display:none; }
+    #history { margin-top:10px; font-family:'Indie Flower', cursive; font-size:0.95rem; max-height:150px; overflow-y:auto; border-top:1px solid #ddd; padding-top:6px; white-space:pre; }
+    .correct { color:green; }
+    .wrong { color:#c0392b; }
+    #timer { font-weight:700; }
+    .keypad { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+    .keypad button { flex:1 0 30%; font-size:1.5rem; padding:12px; background:#ffd6e8; border:1px solid #ddd; border-radius:6px; cursor:pointer; }
   </style>
 </head>
 <body>
@@ -47,31 +47,28 @@
       <option value="8">+8</option>
       <option value="9">+9</option>
     </select>
-
     <button id="startBtn">Start</button>
     <button id="resetBtn">Reset</button>
   </div>
 
   <div class="card">
     <div><span>Time left: </span><span id="timer">60</span>s</div>
-
     <div class="problem" id="problem">—</div>
-
     <div>
       <label for="answer">Your answer:</label>
-      <input id="answer" inputmode="numeric" autocomplete="off" style="font-size:1.2rem;padding:6px;width:120px; font-family:'Indie Flower', cursive;">
+      <input id="answer" inputmode="numeric" autocomplete="off" style="font-size:1.2rem; padding:6px; width:120px; font-family:'Indie Flower', cursive;">
     </div>
 
     <div class="keypad">
-      <button data-num="1">1</button>
-      <button data-num="2">2</button>
-      <button data-num="3">3</button>
-      <button data-num="4">4</button>
-      <button data-num="5">5</button>
-      <button data-num="6">6</button>
       <button data-num="7">7</button>
       <button data-num="8">8</button>
       <button data-num="9">9</button>
+      <button data-num="4">4</button>
+      <button data-num="5">5</button>
+      <button data-num="6">6</button>
+      <button data-num="1">1</button>
+      <button data-num="2">2</button>
+      <button data-num="3">3</button>
       <button data-num="0">0</button>
       <button data-num="clear">C</button>
     </div>
