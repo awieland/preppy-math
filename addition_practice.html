@@ -174,11 +174,12 @@
       }
 
       function submitAnswer(userVal){
-debugger;	  
         if(!running) return;
         const left = Number(problemEl.dataset.left);
         if(Number.isNaN(left)) return;
         const correctVal = left + addend;
+        if(userVal === null || userVal === undefined) return;
+
         problemsAsked += 1;
         if(userVal === correctVal){
           correct += 1;
@@ -196,6 +197,15 @@ debugger;
         newProblem();
       }
 
+      function handleInputDigit(digit){
+        answerInput.value += digit;
+        const left = Number(problemEl.dataset.left);
+        const correctVal = left + addend;
+        if(answerInput.value.length >= String(correctVal).length){
+          submitAnswer(Number(answerInput.value));
+        }
+      }
+
       startBtn.addEventListener('click', startRound);
       resetBtn.addEventListener('click', resetAll);
 
@@ -205,8 +215,7 @@ debugger;
           if(val === 'clear'){
             answerInput.value = '';
           } else {
-            const userNum = Number(val);
-            submitAnswer(userNum);
+            handleInputDigit(val);
           }
         });
       });
@@ -214,8 +223,7 @@ debugger;
       answerInput.addEventListener('keydown', (e)=>{
         if(e.key >= '0' && e.key <= '9'){
           e.preventDefault();
-          const userNum = Number(e.key);
-          submitAnswer(userNum);
+          handleInputDigit(e.key);
         } else if(e.key === 'Backspace'){
           e.preventDefault();
           answerInput.value = '';
