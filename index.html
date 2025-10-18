@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Math Facts Practice</title>
   <link href="https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap" rel="stylesheet">
-  <!-- PWA manifest -->
   <link rel="manifest" href="manifest.json">
   <style>
     body {
@@ -18,7 +17,7 @@
       justify-content: flex-start;
       min-height: 100vh;
       margin: 0;
-      padding: 1.2rem; /* ~20% larger */
+      padding: 1.2rem;
       text-align: center;
     }
     h1 {
@@ -31,6 +30,13 @@
     }
     #game-container {
       margin-top: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #timer {
+      font-size: 1.44rem;
+      margin-bottom: 0.6rem;
     }
     #problem {
       font-size: 3rem;
@@ -42,9 +48,11 @@
       margin-bottom: 0.6rem;
       font-size: 1.5rem;
     }
-    #timer {
-      font-size: 1.44rem;
-      margin-bottom: 0.6rem;
+    #summary {
+      font-size: 1.56rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+      min-height: 2rem;
     }
     #keypad {
       display: grid;
@@ -74,12 +82,6 @@
       display: flex;
       align-items: center;
       justify-content: center;
-    }
-    #summary {
-      margin-top: 1.2rem;
-      font-size: 1.56rem;
-      font-weight: bold;
-      min-height: 2rem;
     }
     #reset {
       margin-top: 1.2rem;
@@ -120,9 +122,9 @@
     <div id="timer">Time: 60</div>
     <div id="problem">Press start</div>
     <div id="feedback"></div>
+    <div id="summary"></div> <!-- moved above keypad -->
     <div id="keypad"></div>
     <button id="reset">Start / Reset</button>
-    <div id="summary"></div>
   </div>
 
   <script>
@@ -155,6 +157,7 @@
       input = '';
       problemEl.textContent = `${num1} + ${num2} = ?`;
       feedbackEl.textContent = '';
+      summaryEl.textContent = '';
     }
 
     function updateTimer() {
@@ -170,7 +173,9 @@
 
     function showSummary() {
       const accuracy = total ? Math.round((correct / total) * 100) : 0;
-      summaryEl.textContent = `You got ${correct}/${total} correct (${accuracy}%).`;
+      problemEl.textContent = `You got ${correct}/${total} correct (${accuracy}%).`; // replaces problem
+      feedbackEl.textContent = '';
+      summaryEl.textContent = ''; // optional: clear the old summary text
     }
 
     function handleInput(value) {
@@ -224,7 +229,6 @@
       correct = 0;
       total = 0;
       timerEl.textContent = `Time: ${timeLeft}`;
-      summaryEl.textContent = '';
       roundActive = true;
       newProblem();
       timer = setInterval(updateTimer, 1000);
