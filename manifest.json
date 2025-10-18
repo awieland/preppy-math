@@ -1,6 +1,6 @@
 {
-  "name": "Math Facts Practice",
-  "short_name": "Math Facts",
+  "name": "Preppy Math Facts Practice",
+  "short_name": "Preppy Math",
   "description": "A fun math practice app for kids.",
   "start_url": "./index.html",
   "display": "standalone",
