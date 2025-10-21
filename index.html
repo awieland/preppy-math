@@ -173,7 +173,7 @@
 
     function showSummary() {
       const accuracy = total ? Math.round((correct / total) * 100) : 0;
-      problemEl.textContent = `You got ${correct}/${total} correct (${accuracy}%).`; // replaces problem
+      problemEl.textContent = `You got ${correct}/${total} correct (${accuracy}%)`; // replaces problem
       feedbackEl.textContent = '';
       summaryEl.textContent = ''; // optional: clear the old summary text
     }
