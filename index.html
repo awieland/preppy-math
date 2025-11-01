@@ -15,68 +15,69 @@
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      min-height: 100vh;
+      height: 100vh;
       margin: 0;
-      padding: 1.2rem;
+      padding: 1rem;
       text-align: center;
+      font-size: 1.2rem; /* ~20% larger */
     }
     h1 {
-      font-size: 2.64rem;
-      margin: 0.6rem 0;
+      font-size: 2.6rem;
+      margin: 0.5rem 0;
     }
     #setup {
-      margin: 0.6rem;
-      font-size: 1.2rem;
+      margin: 0.5rem;
+    }
+    select {
+      font-family: 'Indie Flower', cursive;
+      font-size: 1.1rem;
+      padding: 0.3rem;
+      border-radius: 8px;
+      border: none;
+      background-color: #ffb6c1;
     }
     #game-container {
-      margin-top: 1.2rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      margin-top: 1rem;
+      max-width: 400px;
     }
     #timer {
-      font-size: 1.44rem;
-      margin-bottom: 0.6rem;
+      font-size: 1.4rem;
+      margin-bottom: 0.5rem;
     }
     #problem {
       font-size: 3rem;
-      margin: 1.2rem 0;
-      min-height: 3.5rem;
+      margin: 1rem 0;
     }
     #feedback {
       height: 1.8rem;
-      margin-bottom: 0.6rem;
+      margin-bottom: 0.5rem;
       font-size: 1.5rem;
     }
     #summary {
-      font-size: 1.56rem;
+      margin-top: 0.5rem;
+      font-size: 1.4rem;
       font-weight: bold;
-      margin-bottom: 1rem;
-      min-height: 2rem;
+      min-height: 1.8rem;
     }
     #keypad {
       display: grid;
-      grid-template-columns: repeat(3, 96px);
+      grid-template-columns: repeat(3, 80px);
       gap: 0.6rem;
       justify-content: center;
-      margin-top: 0.8rem;
+      margin-top: 1rem;
     }
     .key {
       background-color: #ffb6c1;
       border: none;
-      border-radius: 14px;
+      border-radius: 12px;
       font-family: 'Indie Flower', cursive;
       font-size: 1.8rem;
       padding: 0.6rem;
       cursor: pointer;
       user-select: none;
     }
-    .key:active {
-      transform: scale(0.97);
-    }
-    #key-0 {
-      grid-column: span 2;
-    }
+    .key:active { transform: scale(0.97); }
+    #key-0 { grid-column: span 2; }
     #backspace {
       background-color: #ffb6c1;
       display: flex;
@@ -84,45 +85,48 @@
       justify-content: center;
     }
     #reset {
-      margin-top: 1.2rem;
+      margin-top: 1rem;
       background-color: #ffb6c1;
       border: none;
-      border-radius: 14px;
+      border-radius: 12px;
       font-family: 'Indie Flower', cursive;
-      font-size: 1.44rem;
+      font-size: 1.3rem;
       padding: 0.6rem 1.2rem;
       cursor: pointer;
-    }
-    select {
-      font-size: 1.2rem;
-      padding: 0.3rem;
-      border-radius: 8px;
     }
   </style>
 </head>
 <body>
   <h1>Math Facts Practice</h1>
   <div id="setup">
-    <label for="fixedAddend">Fix second addend:</label>
-    <select id="fixedAddend">
+    <label for="operation">Operation:</label>
+    <select id="operation">
+      <option value="+">+</option>
+      <option value="-">−</option>
+      <option value="x">x</option>
+      <!-- division will come later -->
+    </select>
+    <label for="fixedValue" id="fixedLabel">Fix second addend:</label>
+    <select id="fixedValue">
       <option value="">Random</option>
-      <option value="0">+0</option>
-      <option value="1">+1</option>
-      <option value="2">+2</option>
-      <option value="3">+3</option>
-      <option value="4">+4</option>
-      <option value="5">+5</option>
-      <option value="6">+6</option>
-      <option value="7">+7</option>
-      <option value="8">+8</option>
-      <option value="9">+9</option>
+      <option value="0">0</option>
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+      <option value="6">6</option>
+      <option value="7">7</option>
+      <option value="8">8</option>
+      <option value="9">9</option>
     </select>
   </div>
+
   <div id="game-container">
     <div id="timer">Time: 60</div>
     <div id="problem">Press start</div>
     <div id="feedback"></div>
-    <div id="summary"></div> <!-- moved above keypad -->
+    <div id="summary"></div>
     <div id="keypad"></div>
     <button id="reset">Start / Reset</button>
   </div>
@@ -134,7 +138,9 @@
     const keypadEl = document.getElementById('keypad');
     const summaryEl = document.getElementById('summary');
     const resetBtn = document.getElementById('reset');
-    const fixedAddendEl = document.getElementById('fixedAddend');
+    const fixedValueEl = document.getElementById('fixedValue');
+    const operationEl = document.getElementById('operation');
+    const fixedLabelEl = document.getElementById('fixedLabel');
 
     let num1, num2, answer;
     let input = '';
@@ -145,19 +151,48 @@
     let lastProblem = '';
     let roundActive = false;
 
+    function updateFixedLabel() {
+      const op = operationEl.value;
+      const labelText = {
+        '+': 'Fix second addend:',
+        '-': 'Fix subtrahend:',
+        'x': 'Fix second factor:'
+      }[op];
+      fixedLabelEl.textContent = labelText;
+    }
+
     function newProblem() {
       if (!roundActive) return;
+
+      const op = operationEl.value;
+      const fixed = fixedValueEl.value;
+      let expr = '';
+
       do {
         num1 = Math.floor(Math.random() * 10);
-        const fixed = fixedAddendEl.value;
         num2 = fixed === '' ? Math.floor(Math.random() * 10) : parseInt(fixed);
-        answer = num1 + num2;
-      } while (`${num1}+${num2}` === lastProblem);
-      lastProblem = `${num1}+${num2}`;
-      input = '';
-      problemEl.textContent = `${num1} + ${num2} = ?`;
+
+        switch (op) {
+          case '+':
+            answer = num1 + num2;
+            expr = `${num1} + ${num2}`;
+            break;
+          case '-':
+            if (num1 < num2) [num1, num2] = [num2, num1]; // avoid negatives
+            answer = num1 - num2;
+            expr = `${num1} − ${num2}`;
+            break;
+          case 'x':
+            answer = num1 * num2;
+            expr = `${num1} x ${num2}`;
+            break;
+        }
+      } while (expr === lastProblem);
+      lastProblem = expr;
+      problemEl.textContent = `${expr} = ?`;
       feedbackEl.textContent = '';
-      summaryEl.textContent = '';
+      input = '';
+      summaryEl.textContent = ''; // keep summary clear during play
     }
 
     function updateTimer() {
@@ -173,20 +208,19 @@
 
     function showSummary() {
       const accuracy = total ? Math.round((correct / total) * 100) : 0;
-      problemEl.textContent = `You got ${correct}/${total} correct (${accuracy}%)`; // replaces problem
-      feedbackEl.textContent = '';
-      summaryEl.textContent = ''; // optional: clear the old summary text
+      problemEl.textContent = `You got ${correct}/${total} correct (${accuracy}%)`;
+      summaryEl.textContent = '';
     }
 
     function handleInput(value) {
       if (!roundActive) return;
       if (value === 'backspace') {
         input = input.slice(0, -1);
-        problemEl.textContent = `${num1} + ${num2} = ${input || '?'}`;
+        problemEl.textContent = `${num1} ${operationEl.value} ${num2} = ${input}`;
         return;
       }
       input += value;
-      problemEl.textContent = `${num1} + ${num2} = ${input}`;
+      problemEl.textContent = `${num1} ${operationEl.value} ${num2} = ${input}`;
       if (parseInt(input) === answer) {
         feedbackEl.textContent = '✅';
         correct++;
@@ -200,8 +234,8 @@
     }
 
     function buildKeypad() {
-      keypadEl.innerHTML = '';
       const layout = ['7','8','9','4','5','6','1','2','3','0','backspace'];
+      keypadEl.innerHTML = '';
       layout.forEach(key => {
         const btn = document.createElement('button');
         btn.classList.add('key');
@@ -228,28 +262,33 @@
       timeLeft = 60;
       correct = 0;
       total = 0;
-      timerEl.textContent = `Time: ${timeLeft}`;
+      timerEl.textContent = 'Time: 60';
+      feedbackEl.textContent = '';
+      summaryEl.textContent = '';
       roundActive = true;
       newProblem();
       timer = setInterval(updateTimer, 1000);
     });
 
+    operationEl.addEventListener('change', updateFixedLabel);
+
     buildKeypad();
+    updateFixedLabel();
 
     // --- PWA Service Worker Registration ---
 	if ('serviceWorker' in navigator) {
 	  navigator.serviceWorker.register('/service-worker.js').then(reg => {
-		reg.onupdatefound = () => {
-		  const newWorker = reg.installing;
-		  newWorker.onstatechange = () => {
-			if (newWorker.state === 'installed') {
-			  if (navigator.serviceWorker.controller) {
-				// New update available
-				window.location.reload(); // refresh to use the new service worker
-			  }
-			}
-		  };
-		};
+      reg.onupdatefound = () => {
+        const newWorker = reg.installing;
+        newWorker.onstatechange = () => {
+          if (newWorker.state === 'installed') {
+            if (navigator.serviceWorker.controller) {
+              // New update available
+              window.location.reload(); // refresh to use the new service worker
+            }
+          }
+        };
+      };
 	  });
 	}
   </script>
