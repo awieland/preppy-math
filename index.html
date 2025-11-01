@@ -47,6 +47,7 @@
     #problem {
       font-size: 3rem;
       margin: 1rem 0;
+      min-height: 3.5rem;
     }
     #feedback {
       height: 1.8rem;
@@ -104,7 +105,6 @@
       <option value="+">+</option>
       <option value="-">−</option>
       <option value="x">x</option>
-      <!-- division will come later -->
     </select>
     <label for="fixedValue" id="fixedLabel">Fix second addend:</label>
     <select id="fixedValue">
@@ -178,7 +178,7 @@
             expr = `${num1} + ${num2}`;
             break;
           case '-':
-            if (num1 < num2) [num1, num2] = [num2, num1]; // avoid negatives
+            if (num1 < num2) [num1, num2] = [num2, num1];
             answer = num1 - num2;
             expr = `${num1} − ${num2}`;
             break;
@@ -192,7 +192,7 @@
       problemEl.textContent = `${expr} = ?`;
       feedbackEl.textContent = '';
       input = '';
-      summaryEl.textContent = ''; // keep summary clear during play
+      summaryEl.textContent = '';
     }
 
     function updateTimer() {
@@ -265,9 +265,14 @@
       timerEl.textContent = 'Time: 60';
       feedbackEl.textContent = '';
       summaryEl.textContent = '';
-      roundActive = true;
-      newProblem();
-      timer = setInterval(updateTimer, 1000);
+      problemEl.textContent = 'Get ready...';
+      roundActive = false; // inactive during the countdown
+
+      setTimeout(() => {
+        roundActive = true;
+        newProblem();
+        timer = setInterval(updateTimer, 1000);
+      }, 2000); // 2-second delay
     });
 
     operationEl.addEventListener('change', updateFixedLabel);
@@ -283,8 +288,7 @@
         newWorker.onstatechange = () => {
           if (newWorker.state === 'installed') {
             if (navigator.serviceWorker.controller) {
-              // New update available
-              window.location.reload(); // refresh to use the new service worker
+              window.location.reload();
             }
           }
         };
