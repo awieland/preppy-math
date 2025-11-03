@@ -19,7 +19,7 @@
       margin: 0;
       padding: 1rem;
       text-align: center;
-      font-size: 1.2rem; /* ~20% larger */
+      font-size: 1.2rem;
     }
     h1 {
       font-size: 2.6rem;
@@ -60,6 +60,40 @@
       font-weight: bold;
       min-height: 1.8rem;
     }
+    #reset {
+      margin: 1rem 0 1.5rem 0;
+      background-color: #ffb6c1;
+      color: #333;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Indie Flower', cursive;
+      font-size: 1.4rem;
+      padding: 0.7rem 1.4rem;
+      cursor: pointer;
+      transition: background-color 0.2s ease, opacity 0.2s ease, transform 0.3s ease, color 0.2s ease;
+    }
+    #reset:hover {
+      background-color: #ff9fb3;
+    }
+    #reset:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Pulse animation */
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    /* ✅ Enhanced visibility for Get ready... */
+    #reset.pulsing {
+      animation: pulse 1s ease-in-out infinite;
+      background-color: #ffd6e0 !important;
+      color: #663366;
+    }
+
     #keypad {
       display: grid;
       grid-template-columns: repeat(3, 80px);
@@ -85,18 +119,9 @@
       align-items: center;
       justify-content: center;
     }
-    #reset {
-      margin-top: 1rem;
-      background-color: #ffb6c1;
-      border: none;
-      border-radius: 12px;
-      font-family: 'Indie Flower', cursive;
-      font-size: 1.3rem;
-      padding: 0.6rem 1.2rem;
-      cursor: pointer;
-    }
   </style>
 </head>
+
 <body>
   <h1>Math Facts Practice</h1>
   <div id="setup">
@@ -124,11 +149,13 @@
 
   <div id="game-container">
     <div id="timer">Time: 60</div>
-    <div id="problem">Press start</div>
+    <div id="problem"></div>
     <div id="feedback"></div>
     <div id="summary"></div>
+
+    <button id="reset">Start</button>
+
     <div id="keypad"></div>
-    <button id="reset">Start / Reset</button>
   </div>
 
   <script>
@@ -152,13 +179,11 @@
     let roundActive = false;
 
     function updateFixedLabel() {
-      const op = operationEl.value;
-      const labelText = {
+      fixedLabelEl.textContent = {
         '+': 'Fix second addend:',
         '-': 'Fix subtrahend:',
         'x': 'Fix second factor:'
-      }[op];
-      fixedLabelEl.textContent = labelText;
+      }[operationEl.value];
     }
 
     function newProblem() {
@@ -188,6 +213,7 @@
             break;
         }
       } while (expr === lastProblem);
+
       lastProblem = expr;
       problemEl.textContent = `${expr} = ?`;
       feedbackEl.textContent = '';
@@ -202,6 +228,7 @@
       } else {
         clearInterval(timer);
         roundActive = false;
+        resetBtn.textContent = 'Start';
         showSummary();
       }
     }
@@ -214,13 +241,16 @@
 
     function handleInput(value) {
       if (!roundActive) return;
+
       if (value === 'backspace') {
         input = input.slice(0, -1);
         problemEl.textContent = `${num1} ${operationEl.value} ${num2} = ${input}`;
         return;
       }
+
       input += value;
       problemEl.textContent = `${num1} ${operationEl.value} ${num2} = ${input}`;
+
       if (parseInt(input) === answer) {
         feedbackEl.textContent = '✅';
         correct++;
@@ -243,8 +273,9 @@
           btn.id = 'backspace';
           btn.innerHTML = '&#9003;';
         } else {
-          btn.textContent = key;
-          if (key === '0') btn.id = 'key-0';
+        btn.textContent = key;
+        if (key === 'backspace') btn.innerHTML = '&#9003;';
+        if (key === '0') btn.id = 'key-0';
         }
         btn.addEventListener('click', () => handleInput(key));
         keypadEl.appendChild(btn);
@@ -258,21 +289,29 @@
     });
 
     resetBtn.addEventListener('click', () => {
+      // Always restart (even mid-round)
       clearInterval(timer);
+      roundActive = false;
+      resetBtn.textContent = 'Get ready...';
+      resetBtn.disabled = true;
+      resetBtn.classList.add('pulsing');
+
       timeLeft = 60;
       correct = 0;
       total = 0;
       timerEl.textContent = 'Time: 60';
       feedbackEl.textContent = '';
       summaryEl.textContent = '';
-      problemEl.textContent = 'Get ready...';
-      roundActive = false; // inactive during the countdown
+      problemEl.textContent = '';
 
       setTimeout(() => {
+        resetBtn.disabled = false;
+        resetBtn.classList.remove('pulsing');
+        resetBtn.textContent = 'Reset';
         roundActive = true;
         newProblem();
         timer = setInterval(updateTimer, 1000);
-      }, 2000); // 2-second delay
+      }, 2000);
     });
 
     operationEl.addEventListener('change', updateFixedLabel);
@@ -280,21 +319,19 @@
     buildKeypad();
     updateFixedLabel();
 
-    // --- PWA Service Worker Registration ---
-	if ('serviceWorker' in navigator) {
-	  navigator.serviceWorker.register('/service-worker.js').then(reg => {
-      reg.onupdatefound = () => {
-        const newWorker = reg.installing;
-        newWorker.onstatechange = () => {
-          if (newWorker.state === 'installed') {
-            if (navigator.serviceWorker.controller) {
+    // PWA service worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js').then(reg => {
+        reg.onupdatefound = () => {
+          const newWorker = reg.installing;
+          newWorker.onstatechange = () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
               window.location.reload();
             }
-          }
+          };
         };
-      };
-	  });
-	}
+      });
+    }
   </script>
 </body>
 </html>

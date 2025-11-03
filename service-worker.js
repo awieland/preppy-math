@@ -1,4 +1,4 @@
-const CURRENT_CACHE_NAME = 'math-practice-v5';
+const CURRENT_CACHE_NAME = 'math-practice-v6';
 const FILES_TO_CACHE = [
   './',
   './index.html',
